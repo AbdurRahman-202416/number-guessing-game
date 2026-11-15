@@ -1,0 +1,293 @@
+@import "tailwindcss";
+
+/*
+  Design direction: "the measuring instrument".
+  A saturated ultramarine field like a blueprint or a drafting sheet, with a
+  paper-white ruler as the hero. Heat reads as three signal colours:
+  ice (cold), butter (warm), coral (hot).
+*/
+
+@theme {
+  --color-ultra: #1d2bb8;
+  --color-deep: #141f94;
+  --color-night: #0b1050;
+  --color-paper: #f4f2ff;
+  --color-mist: #c9ceff;
+  --color-butter: #ffd43b;
+  --color-coral: #ff6f4f;
+  --color-ice: #9be0ff;
+
+  --font-display: var(--font-display-face), "Arial Narrow", system-ui, sans-serif;
+  --font-sans: var(--font-body-face), system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --ring: var(--color-butter);
+  color-scheme: dark;
+}
+
+html {
+  background: var(--color-ultra);
+}
+
+body {
+  min-height: 100dvh;
+  color: var(--color-paper);
+  font-family: var(--font-sans);
+  background-color: var(--color-ultra);
+  /* Graph paper, faded out toward the bottom of the page. */
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Browser surfaces that belong to the design, not the defaults. */
+::selection {
+  background: var(--color-butter);
+  color: var(--color-night);
+}
+
+* {
+  scrollbar-color: var(--color-mist) transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+input {
+  caret-color: var(--color-ultra);
+}
+
+/* Hide the number-input spinners; the keyboard and Enter do the job. */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.numeral {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform 160ms var(--ease-out-expo),
+    background-color 160ms,
+    color 160ms,
+    box-shadow 160ms;
+}
+.btn:active {
+  transform: translateY(1px) scale(0.985);
+}
+.btn-primary {
+  background: var(--color-butter);
+  color: var(--color-night);
+  box-shadow: 0 6px 0 -2px rgb(11 16 80 / 0.55);
+}
+.btn-primary:hover {
+  background: #ffe074;
+}
+.btn-ghost {
+  color: var(--color-paper);
+  box-shadow: inset 0 0 0 2px rgb(201 206 255 / 0.55);
+}
+.btn-ghost:hover {
+  background: rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 0 0 2px var(--color-paper);
+}
+
+/* Paper surfaces (the result dialog) use an ultramarine ring instead. */
+.on-paper {
+  --ring: var(--color-ultra);
+}
+.on-paper .btn-primary {
+  background: var(--color-ultra);
+  color: var(--color-paper);
+}
+.on-paper .btn-primary:hover {
+  background: var(--color-deep);
+}
+.on-paper .btn-ghost {
+  color: var(--color-night);
+  box-shadow: inset 0 0 0 2px rgb(11 16 80 / 0.45);
+}
+.on-paper .btn-ghost:hover {
+  background: rgb(20 31 148 / 0.08);
+  box-shadow: inset 0 0 0 2px var(--color-night);
+}
+
+/* ---------- Ruler ---------- */
+
+.ruler-track {
+  background-color: var(--color-night);
+  background-image:
+    linear-gradient(to right, rgb(201 206 255 / 0.5) 1px, transparent 1px),
+    linear-gradient(to right, rgb(201 206 255 / 0.2) 1px, transparent 1px);
+  background-size:
+    10% 100%,
+    2% 45%;
+  background-repeat: repeat-x;
+  background-position:
+    0 0,
+    0 100%;
+}
+
+.ruler-live {
+  background: rgb(255 212 59 / 0.2);
+  border-top: 3px solid var(--color-butter);
+  border-bottom: 3px solid var(--color-butter);
+  transition:
+    left 700ms var(--ease-out-expo),
+    width 700ms var(--ease-out-expo);
+}
+
+.ruler-mystery {
+  transition: left 700ms var(--ease-out-expo);
+}
+
+.ruler-mark {
+  transition: left 500ms var(--ease-out-expo);
+}
+
+/* ---------- Motion ---------- */
+
+@keyframes row-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.row-in {
+  animation: row-in 420ms var(--ease-out-expo) both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pop-in {
+  animation: pop-in 560ms var(--ease-out-expo) both;
+}
+
+@keyframes number-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.25);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) scale(0.98);
+  }
+  100% {
+    transform: none;
+  }
+}
+.number-drop {
+  animation: number-drop 700ms var(--ease-out-expo) 180ms both;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+.shake {
+  animation: shake 360ms ease-in-out;
+}
+
+@keyframes confetti-fall {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--drift), 112vh, 0) rotate(var(--spin));
+  }
+}
+.confetti-piece {
+  position: absolute;
+  top: 0;
+  border-radius: 2px;
+  animation: confetti-fall var(--dur) cubic-bezier(0.25, 0.6, 0.4, 1) var(--delay) both;
+}
+
+dialog::backdrop {
+  background: rgb(8 12 64 / 0.78);
+  backdrop-filter: blur(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .confetti-piece {
+    display: none;
+  }
+}
