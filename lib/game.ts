@@ -8,12 +8,15 @@ export interface Difficulty {
   maxTries: number;
   /** Points per remaining try (plus one for the winning guess). */
   multiplier: number;
+  /** How hard the level feels, 1 to 3 stars. */
+  rating: 1 | 2 | 3;
+  tagline: string;
 }
 
 export const DIFFICULTIES: readonly Difficulty[] = [
-  { id: "easy", label: "Easy", min: 1, max: 50, maxTries: 10, multiplier: 10 },
-  { id: "medium", label: "Medium", min: 1, max: 100, maxTries: 7, multiplier: 20 },
-  { id: "hard", label: "Hard", min: 1, max: 500, maxTries: 9, multiplier: 30 },
+  { id: "easy", label: "Easy", min: 1, max: 50, maxTries: 10, multiplier: 10, rating: 1, tagline: "Warm-up round" },
+  { id: "medium", label: "Medium", min: 1, max: 100, maxTries: 7, multiplier: 20, rating: 2, tagline: "Getting spicy" },
+  { id: "hard", label: "Hard", min: 1, max: 500, maxTries: 9, multiplier: 30, rating: 3, tagline: "Boss mode" },
 ];
 
 export type Verdict = "low" | "high" | "correct";
@@ -34,6 +37,10 @@ export interface GameState {
   guesses: Guess[];
   /** Best score for this difficulty when the round began. */
   bestBefore: number;
+  /** Consecutive wins this session. Resets on a loss or an abandoned round. */
+  streak: number;
+  /** Points won so far this session. */
+  sessionScore: number;
 }
 
 export type GameAction =
@@ -47,6 +54,8 @@ export const initialGameState: GameState = {
   target: null,
   guesses: [],
   bestBefore: 0,
+  streak: 0,
+  sessionScore: 0,
 };
 
 export function randomTarget(difficulty: Difficulty): number {
@@ -78,6 +87,13 @@ export function getBounds(
 
 export function calcScore(difficulty: Difficulty, triesLeft: number): number {
   return (triesLeft + 1) * difficulty.multiplier;
+}
+
+/** Star rating for a won round: fewer tries, more stars. */
+export function calcStars(difficulty: Difficulty, triesUsed: number): 1 | 2 | 3 {
+  if (triesUsed <= Math.ceil(difficulty.maxTries * 0.4)) return 3;
+  if (triesUsed <= Math.ceil(difficulty.maxTries * 0.7)) return 2;
+  return 1;
 }
 
 export type Validation =
@@ -119,6 +135,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "start":
       return {
+        ...state,
         phase: "playing",
         difficulty: action.difficulty,
         target: action.target,
@@ -144,9 +161,23 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           : nextGuesses.length >= difficulty.maxTries
             ? "lost"
             : "playing";
-      return { ...state, guesses: nextGuesses, phase: nextPhase };
+      const won = nextPhase === "won";
+      return {
+        ...state,
+        guesses: nextGuesses,
+        phase: nextPhase,
+        streak: won ? state.streak + 1 : nextPhase === "lost" ? 0 : state.streak,
+        sessionScore: won
+          ? state.sessionScore + calcScore(difficulty, difficulty.maxTries - nextGuesses.length)
+          : state.sessionScore,
+      };
     }
     case "reset":
-      return initialGameState;
+      return {
+        ...initialGameState,
+        // Leaving a round half way breaks the streak; leaving a finished one keeps it.
+        streak: state.phase === "playing" ? 0 : state.streak,
+        sessionScore: state.sessionScore,
+      };
   }
 }
