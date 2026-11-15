@@ -1,36 +1,46 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
+import { Background } from "@/components/Background";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
-const display = Bricolage_Grotesque({
-  variable: "--font-display-face",
+const display = Fredoka({
+  variable: "--font-fredoka",
   subsets: ["latin"],
-  axes: ["opsz", "wdth"],
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
-const body = Instrument_Sans({
-  variable: "--font-body-face",
+const body = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Number Guessing Game",
+  title: "Guess the Number",
   description:
-    "Find the hidden number before you run out of tries. Three difficulties, hot and cold hints, a narrowing range bar and a best score per level.",
+    "An arcade-style number guessing game. Crack the secret number before your hearts run out, with hot and cold hints, streaks, scores and four colour themes.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1d2bb8",
+  themeColor: "#1e1b4b",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body>{children}</body>
+    // data-theme is set by the inline script before paint, so the attribute can differ from the server markup.
+    <html lang="en" className={`${display.variable} ${body.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body>
+        <Background />
+        {children}
+      </body>
     </html>
   );
 }
