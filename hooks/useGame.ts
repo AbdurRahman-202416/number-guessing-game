@@ -21,6 +21,8 @@ export interface UseGame {
   triesLeft: number;
   score: number;
   isNewBest: boolean;
+  streak: number;
+  sessionScore: number;
   startGame: (difficulty: Difficulty) => void;
   submitGuess: (value: number) => void;
   playAgain: () => void;
@@ -78,6 +80,8 @@ export function useGame(): UseGame {
     triesLeft,
     score,
     isNewBest,
+    streak: state.streak,
+    sessionScore: state.sessionScore,
     startGame,
     submitGuess,
     playAgain,
