@@ -1,46 +1,47 @@
+import type { CSSProperties } from "react";
 import type { Heat } from "@/lib/game";
+import { FlameIcon, SnowflakeIcon, SunIcon } from "@/components/icons";
 
-const LEVELS: Record<Exclude<Heat, "found">, { filled: number; label: string; bar: string }> = {
-  cold: { filled: 1, label: "Cold", bar: "bg-ice" },
-  warm: { filled: 2, label: "Warm", bar: "bg-butter" },
-  hot: { filled: 3, label: "Hot", bar: "bg-coral" },
+const POSITION: Record<Heat, number> = { cold: 0.06, warm: 0.5, hot: 0.9, found: 1 };
+
+const LABEL: Record<Heat, string> = {
+  cold: "Freezing cold",
+  warm: "Getting warm",
+  hot: "Burning hot",
+  found: "Bullseye!",
 };
 
 interface HeatMeterProps {
-  heat: Exclude<Heat, "found">;
-  /** Show the word next to the three-step meter. */
-  showLabel?: boolean;
+  heat: Heat | null;
 }
 
-export function HeatMeter({ heat, showLabel = true }: HeatMeterProps) {
-  const level = LEVELS[heat];
+/** Cold-to-hot thermometer. Lives inside the mystery card, so it stays mounted and the marker can slide. */
+export function HeatMeter({ heat }: HeatMeterProps) {
   return (
-    <span className="inline-flex items-center gap-2">
-      <span className="flex items-end gap-[3px]" aria-hidden="true">
-        {[1, 2, 3].map((step) => (
-          <span
-            key={step}
-            style={{ height: 6 + step * 4 }}
-            className={`w-1.5 rounded-sm ${step <= level.filled ? level.bar : "bg-white/20"}`}
-          />
-        ))}
-      </span>
-      {showLabel ? (
-        <span className="text-sm font-bold">{level.label}</span>
-      ) : (
-        <span className="sr-only">{level.label}</span>
-      )}
-    </span>
-  );
-}
+    <div role="img" aria-label={heat ? LABEL[heat] : "Heat meter, no guess yet"} className="relative px-3 pb-3">
+      <div className="mb-0.5 flex items-center justify-between gap-2">
+        <span className="font-display text-xs uppercase tracking-widest text-ink/70">Heat meter</span>
+        <span
+          key={heat ?? "none"}
+          className="anim-pop rounded-full border-2 border-ink bg-ink px-3 py-0.5 font-display text-xs uppercase tracking-wide text-paper"
+        >
+          {heat ? LABEL[heat] : "Guess to feel it"}
+        </span>
+      </div>
 
-export function heatMessage(heat: Exclude<Heat, "found">): string {
-  switch (heat) {
-    case "hot":
-      return "Hot. You're very close.";
-    case "warm":
-      return "Warm. You're in the neighbourhood.";
-    case "cold":
-      return "Cold. You're far away.";
-  }
+      <div className="@container relative h-9">
+        <div className="heat-track absolute inset-x-0 top-1/2 h-4 -translate-y-1/2 rounded-full border-[2.5px] border-ink" />
+        <div
+          className="heat-marker absolute left-0 top-0 flex size-9 items-center justify-center rounded-full border-[3px] border-ink bg-paper text-[1.4rem]"
+          style={{ "--p": heat ? POSITION[heat] : 0.5, opacity: heat ? 1 : 0.6 } as CSSProperties}
+          aria-hidden="true"
+        >
+          {heat === "cold" && <SnowflakeIcon />}
+          {heat === "warm" && <SunIcon />}
+          {(heat === "hot" || heat === "found") && <FlameIcon className="heat-flicker" />}
+          {heat === null && <span className="font-display text-lg text-ink/60">?</span>}
+        </div>
+      </div>
+    </div>
+  );
 }
